@@ -43,6 +43,14 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
+/* The browser's default :visited color has higher specificity than a plain
+   Tailwind text-color utility and silently overrides it on any link the
+   visitor has already navigated to. Reset it globally so every link's own
+   classes are always the source of truth. */
+a:visited {
+  color: inherit;
+}
+
 /* ── Textures & gradients ─────────────── */
 .bg-grain {
   position: relative;

@@ -61,9 +61,9 @@ export default function ReportCard({ report, index = 0 }: ReportCardProps) {
             </div>
 
             {report.address && (
-              <p className="text-xs mb-3 flex items-center gap-1 line-clamp-1 text-gray-500">
+              <p className="text-xs mb-3 flex items-center gap-1 text-gray-500">
                 <MapPin className="w-3 h-3 shrink-0" />
-                {report.address}
+                <span className="truncate min-w-0 flex-1" dir="auto">{report.address}</span>
               </p>
             )}
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import StatusBadge from "@/components/StatusBadge";
+import EmergencyNumbers from "@/components/EmergencyNumbers";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -111,6 +112,9 @@ export default function ReportDetailView({ report }: { report: Report }) {
                 </div>
               ))}
             </div>
+
+            {/* Emergency & service numbers */}
+            <EmergencyNumbers />
 
             {/* Voting */}
             <VotePanel report={report} />

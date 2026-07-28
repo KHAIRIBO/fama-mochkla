@@ -71,7 +71,7 @@ export default function Navbar({ onReportClick, showReport = true }: NavbarProps
             ) : (
               <Link
                 href="/map"
-                className="ml-2 inline-flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
+                className="ml-2 inline-flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white visited:text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
               >
                 <Plus className="w-4 h-4" strokeWidth={2.5} />
                 {t("nav.reportProblem")}
@@ -130,7 +130,7 @@ export default function Navbar({ onReportClick, showReport = true }: NavbarProps
               ) : (
                 <Link
                   href="/map"
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl text-center"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-3 bg-blue-600 text-white visited:text-white font-bold text-sm rounded-xl text-center"
                   onClick={() => setMenuOpen(false)}
                 >
                   <Plus className="w-4 h-4" strokeWidth={2.5} />

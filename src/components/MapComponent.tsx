@@ -19,6 +19,7 @@ import {
 import L from "leaflet";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { MapPin } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   CATEGORY_CONFIG,
@@ -176,9 +177,9 @@ function ReportPopupContent({ report }: { report: Report }) {
           </p>
         )}
         {report.address && (
-          <p className="text-[11px] text-gray-500 line-clamp-1 flex items-center gap-1" dir="auto">
-            <span className="shrink-0">📍</span>
-            <span className="truncate">{report.address}</span>
+          <p className="text-[11px] text-gray-500 flex items-center gap-1">
+            <MapPin className="w-3 h-3 shrink-0" />
+            <span className="truncate min-w-0 flex-1" dir="auto">{report.address}</span>
           </p>
         )}
         <p className="text-[10px] text-gray-400">{timeAgo}</p>
@@ -195,7 +196,7 @@ function ReportPopupContent({ report }: { report: Report }) {
 
         <Link
           href={`/report/${report.id}`}
-          className="block w-full text-center py-2 mt-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-colors"
+          className="block w-full text-center py-2 mt-1 bg-orange-500 hover:bg-orange-400 text-white visited:text-white text-xs font-bold rounded-xl transition-colors"
         >
           {t("popup.viewDetails")}
         </Link>

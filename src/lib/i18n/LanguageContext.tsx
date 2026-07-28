@@ -31,7 +31,7 @@ interface LanguageContextValue {
 }
 
 // Generates dotted key paths like "nav.liveMap" from the translation object shape.
-type NestedKeyPaths = {
+export type NestedKeyPaths = {
   [K in keyof TranslationKey]: `${K & string}.${keyof TranslationKey[K] & string}`;
 }[keyof TranslationKey];
 
