@@ -19,6 +19,7 @@ import {
 import L from "leaflet";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   CATEGORY_CONFIG,
   normalizeCategory,
@@ -82,6 +83,7 @@ function NewPinMarker({ lat, lng }: { lat: number; lng: number }) {
 }
 
 function UserLocationMarker({ lat, lng }: { lat: number; lng: number }) {
+  const { t } = useLanguage();
   const icon = L.divIcon({
     className: "",
     html: `<div style="
@@ -98,7 +100,7 @@ function UserLocationMarker({ lat, lng }: { lat: number; lng: number }) {
   return (
     <Marker position={[lat, lng]} icon={icon} zIndexOffset={-100}>
       <Tooltip direction="top" offset={[0, -10]} permanent opacity={0.9}>
-        You are here
+        {t("map.youAreHere")}
       </Tooltip>
     </Marker>
   );
@@ -141,6 +143,7 @@ function MapCenterController({
 }
 
 function ReportPopupContent({ report }: { report: Report }) {
+  const { t } = useLanguage();
   const category = normalizeCategory(report.category);
   const catCfg = CATEGORY_CONFIG[category];
   const timeAgo = formatDistanceToNow(new Date(report.created_at), {
@@ -183,7 +186,7 @@ function ReportPopupContent({ report }: { report: Report }) {
         <div className="pt-2 border-t border-gray-100">
           {report.status === "resolved" ? (
             <p className="text-[11px] font-medium text-green-600 flex items-center gap-1">
-              ✅ Marked fixed by the community
+              {t("popup.markedFixed")}
             </p>
           ) : (
             <VoteButtons report={report} compact />
@@ -194,7 +197,7 @@ function ReportPopupContent({ report }: { report: Report }) {
           href={`/report/${report.id}`}
           className="block w-full text-center py-2 mt-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-colors"
         >
-          View Details →
+          {t("popup.viewDetails")}
         </Link>
       </div>
     </div>

@@ -1,6 +1,11 @@
+"use client";
+
 import { MapPin } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="border-t border-gray-200 py-8 px-6 text-center text-gray-400 text-sm bg-white">
       <div className="flex items-center justify-center gap-2 mb-2">
@@ -10,7 +15,7 @@ export default function Footer() {
         </span>
       </div>
       <p>
-        Created by Khairi Bouzakher —{" "}
+        {t("footer.createdBy")}{" "}
         <a
           href="https://khairibouzakher.studio"
           target="_blank"

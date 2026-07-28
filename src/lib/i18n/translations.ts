@@ -59,6 +59,7 @@ const en = {
     allStatuses: "All Statuses",
     clearAll: "Clear all",
     useMyLocation: "Use My Location",
+    youAreHere: "You are here",
     locating: "Locating…",
     live: "Live",
     report: "report",
@@ -80,6 +81,7 @@ const en = {
     submitted: "Report Submitted!",
     submittedDesc: "Your report is now live on the map for everyone to see.",
     photoWarning: "Saved without the photo — it couldn't be uploaded: {{error}}",
+    photoUploadFailed: "The photo couldn't be uploaded.",
     done: "Done",
     location: "Location *",
     detectingLocation: "Detecting your location…",
@@ -112,6 +114,7 @@ const en = {
   vote: {
     fixed: "Fixed",
     notFixed: "Not fixed",
+    voteFailed: "Vote failed.",
     thanksVoted: "Thanks — you voted \"{{vote}}\".",
     hasBeenFixed: "Has this been fixed?",
     voteHelp: "Once 3 people confirm it's fixed, this report is marked resolved and removed after 24h.",
@@ -142,7 +145,7 @@ const en = {
     goHome: "Go Home",
     openLiveMap: "Open Live Map",
   },
-} as const;
+};
 
 const fr: typeof en = {
   nav: {
@@ -195,6 +198,7 @@ const fr: typeof en = {
     allStatuses: "Tous les statuts",
     clearAll: "Tout effacer",
     useMyLocation: "Utiliser ma position",
+    youAreHere: "Vous êtes ici",
     locating: "Localisation…",
     live: "En direct",
     report: "signalement",
@@ -216,6 +220,7 @@ const fr: typeof en = {
     submitted: "Signalement envoyé !",
     submittedDesc: "Votre signalement est maintenant visible sur la carte pour tout le monde.",
     photoWarning: "Enregistré sans la photo — échec du téléversement : {{error}}",
+    photoUploadFailed: "La photo n'a pas pu être téléversée.",
     done: "Terminé",
     location: "Emplacement *",
     detectingLocation: "Détection de votre position…",
@@ -248,6 +253,7 @@ const fr: typeof en = {
   vote: {
     fixed: "Réparé",
     notFixed: "Pas réparé",
+    voteFailed: "Échec du vote.",
     thanksVoted: "Merci — vous avez voté « {{vote}} ».",
     hasBeenFixed: "Ce problème a-t-il été réparé ?",
     voteHelp: "Dès que 3 personnes confirment que c'est réparé, le signalement est marqué résolu et supprimé après 24h.",
@@ -331,6 +337,7 @@ const ar: typeof en = {
     allStatuses: "جميع الحالات",
     clearAll: "مسح الكل",
     useMyLocation: "استخدم موقعي",
+    youAreHere: "أنت هنا",
     locating: "جارٍ تحديد الموقع…",
     live: "مباشر",
     report: "بلاغ",
@@ -352,6 +359,7 @@ const ar: typeof en = {
     submitted: "تم إرسال البلاغ!",
     submittedDesc: "بلاغك الآن مباشر على الخريطة ليراه الجميع.",
     photoWarning: "تم الحفظ بدون الصورة — فشل الرفع: {{error}}",
+    photoUploadFailed: "تعذّر رفع الصورة.",
     done: "تم",
     location: "الموقع *",
     detectingLocation: "جارٍ تحديد موقعك…",
@@ -384,6 +392,7 @@ const ar: typeof en = {
   vote: {
     fixed: "تم الإصلاح",
     notFixed: "لم يُصلح",
+    voteFailed: "فشل التصويت.",
     thanksVoted: "شكرًا — لقد صوّت بـ«{{vote}}».",
     hasBeenFixed: "هل تم إصلاح هذه المشكلة؟",
     voteHelp: "بمجرد تأكيد 3 أشخاص أنها أُصلحت، يُعلَّم البلاغ كمحلول ويُحذف بعد 24 ساعة.",

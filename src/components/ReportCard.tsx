@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 import StatusBadge from "./StatusBadge";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { CATEGORY_CONFIG, normalizeCategory, type Report } from "@/types/report";
 
 interface ReportCardProps {
@@ -14,6 +15,7 @@ interface ReportCardProps {
 }
 
 export default function ReportCard({ report, index = 0 }: ReportCardProps) {
+  const { t } = useLanguage();
   const category = normalizeCategory(report.category);
   const catCfg = CATEGORY_CONFIG[category];
   const timeAgo = formatDistanceToNow(new Date(report.created_at), { addSuffix: true });
@@ -69,7 +71,7 @@ export default function ReportCard({ report, index = 0 }: ReportCardProps) {
               <span>{timeAgo}</span>
               {report.reporter_name && (
                 <span className="font-medium text-gray-500">
-                  by {report.reporter_name}
+                  {t("reportCard.by", { name: report.reporter_name })}
                 </span>
               )}
             </div>

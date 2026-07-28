@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Menu, X, Plus } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 interface NavbarProps {
   onReportClick?: () => void;
@@ -12,6 +14,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onReportClick, showReport = true }: NavbarProps) {
+  const { t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -41,60 +44,64 @@ export default function Navbar({ onReportClick, showReport = true }: NavbarProps
         </span>
       </Link>
 
-      {/* Desktop links */}
-      <div className="hidden md:flex items-center gap-2">
-        <Link
-          href="/map"
-          className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all"
-        >
-          Live Map
-        </Link>
-        <Link
-          href="/#reports"
-          className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all"
-        >
-          Reports Feed
-        </Link>
-        {showReport && (
-          onReportClick ? (
-            <button
-              onClick={onReportClick}
-              className="ml-2 inline-flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
-            >
-              <Plus className="w-4 h-4" strokeWidth={2.5} />
-              Report a Problem
-            </button>
-          ) : (
-            <Link
-              href="/map"
-              className="ml-2 inline-flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
-            >
-              <Plus className="w-4 h-4" strokeWidth={2.5} />
-              Report a Problem
-            </Link>
-          )
-        )}
-      </div>
-
-      {/* Mobile hamburger */}
-      <button
-        className="md:hidden w-10 h-10 rounded-xl glass flex items-center justify-center text-gray-900"
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle menu"
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={menuOpen ? "close" : "open"}
-            initial={{ opacity: 0, rotate: -45 }}
-            animate={{ opacity: 1, rotate: 0 }}
-            exit={{ opacity: 0, rotate: 45 }}
-            transition={{ duration: 0.15 }}
-            className="flex"
+      <div className="flex items-center gap-2">
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-2">
+          <Link
+            href="/map"
+            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all"
           >
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </motion.span>
-        </AnimatePresence>
-      </button>
+            {t("nav.liveMap")}
+          </Link>
+          <Link
+            href="/#reports"
+            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all"
+          >
+            {t("nav.reportsFeed")}
+          </Link>
+          {showReport && (
+            onReportClick ? (
+              <button
+                onClick={onReportClick}
+                className="ml-2 inline-flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
+              >
+                <Plus className="w-4 h-4" strokeWidth={2.5} />
+                {t("nav.reportProblem")}
+              </button>
+            ) : (
+              <Link
+                href="/map"
+                className="ml-2 inline-flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
+              >
+                <Plus className="w-4 h-4" strokeWidth={2.5} />
+                {t("nav.reportProblem")}
+              </Link>
+            )
+          )}
+        </div>
+
+        <LanguageSwitcher />
+
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden w-10 h-10 rounded-xl glass flex items-center justify-center text-gray-900"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={menuOpen ? "close" : "open"}
+              initial={{ opacity: 0, rotate: -45 }}
+              animate={{ opacity: 1, rotate: 0 }}
+              exit={{ opacity: 0, rotate: 45 }}
+              transition={{ duration: 0.15 }}
+              className="flex"
+            >
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </motion.span>
+          </AnimatePresence>
+        </button>
+      </div>
 
       {/* Mobile menu */}
       <AnimatePresence>
@@ -106,10 +113,10 @@ export default function Navbar({ onReportClick, showReport = true }: NavbarProps
             className="absolute top-16 left-4 right-4 glass rounded-2xl p-4 flex flex-col gap-2 md:hidden"
           >
             <Link href="/map" className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all" onClick={() => setMenuOpen(false)}>
-              Live Map
+              {t("nav.liveMap")}
             </Link>
             <Link href="/#reports" className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all" onClick={() => setMenuOpen(false)}>
-              Reports Feed
+              {t("nav.reportsFeed")}
             </Link>
             {showReport && (
               onReportClick ? (
@@ -118,7 +125,7 @@ export default function Navbar({ onReportClick, showReport = true }: NavbarProps
                   className="inline-flex items-center justify-center gap-1.5 px-4 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl text-center"
                 >
                   <Plus className="w-4 h-4" strokeWidth={2.5} />
-                  Report a Problem
+                  {t("nav.reportProblem")}
                 </button>
               ) : (
                 <Link
@@ -127,7 +134,7 @@ export default function Navbar({ onReportClick, showReport = true }: NavbarProps
                   onClick={() => setMenuOpen(false)}
                 >
                   <Plus className="w-4 h-4" strokeWidth={2.5} />
-                  Report a Problem
+                  {t("nav.reportProblem")}
                 </Link>
               )
             )}

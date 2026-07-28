@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { castVote } from "@/lib/supabase";
 import { getVote, recordVote } from "@/lib/votes";
 import type { Report } from "@/types/report";
@@ -13,6 +14,7 @@ interface VoteButtonsProps {
 }
 
 export default function VoteButtons({ report, onVoted, compact = false }: VoteButtonsProps) {
+  const { t } = useLanguage();
   const [myVote, setMyVote] = useState<"fixed" | "not_fixed" | null>(null);
   const [fixedVotes, setFixedVotes] = useState(report.fixed_votes ?? 0);
   const [notFixedVotes, setNotFixedVotes] = useState(report.not_fixed_votes ?? 0);
@@ -50,7 +52,7 @@ export default function VoteButtons({ report, onVoted, compact = false }: VoteBu
       setMyVote(null);
       setFixedVotes(prevFixed);
       setNotFixedVotes(prevNotFixed);
-      setError(err instanceof Error ? err.message : "Vote failed.");
+      setError(err instanceof Error ? err.message : t("vote.voteFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -74,7 +76,7 @@ export default function VoteButtons({ report, onVoted, compact = false }: VoteBu
           }`}
         >
           <ThumbsUp className={compact ? "w-3 h-3" : "w-3.5 h-3.5"} />
-          Fixed · {fixedVotes}
+          {t("vote.fixed")} · {fixedVotes}
         </button>
         <button
           type="button"
@@ -87,12 +89,14 @@ export default function VoteButtons({ report, onVoted, compact = false }: VoteBu
           }`}
         >
           <ThumbsDown className={compact ? "w-3 h-3" : "w-3.5 h-3.5"} />
-          Not fixed · {notFixedVotes}
+          {t("vote.notFixed")} · {notFixedVotes}
         </button>
       </div>
       {error && <p className="text-[10px] text-red-500">{error}</p>}
       {!isResolved && myVote && (
-        <p className="text-[10px] text-gray-400">Thanks — you voted &quot;{myVote === "fixed" ? "fixed" : "not fixed"}&quot;.</p>
+        <p className="text-[10px] text-gray-400">
+          {t("vote.thanksVoted", { vote: myVote === "fixed" ? t("vote.fixed") : t("vote.notFixed") })}
+        </p>
       )}
     </div>
   );

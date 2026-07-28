@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Camera, CheckCircle2, ImagePlus, Loader2, MapPin, X } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { insertReport, uploadPhoto } from "@/lib/supabase";
 import { CATEGORY_CONFIG, type ReportCategory } from "@/types/report";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ export default function ReportModal({
   initialLat = null,
   initialLng = null,
 }: ReportModalProps) {
+  const { t } = useLanguage();
   const [lat, setLat] = useState<number | null>(initialLat);
   const [lng, setLng] = useState<number | null>(initialLng);
   const [address, setAddress] = useState("");
@@ -116,7 +118,7 @@ export default function ReportModal({
   const handleSubmit = async () => {
     if (!lat || !lng || !title.trim()) return;
     if (category === "other" && !otherCategoryText.trim() && !description.trim()) {
-      setError("Please specify the problem type or add a description.");
+      setError(t("modal.specifyOrDescribe"));
       return;
     }
 
@@ -132,7 +134,7 @@ export default function ReportModal({
         photo_url = await uploadPhoto(photoFile);
       } catch (err) {
         setPhotoWarning(
-          err instanceof Error ? err.message : "The photo couldn't be uploaded."
+          err instanceof Error ? err.message : t("modal.photoUploadFailed")
         );
       }
     }
@@ -157,7 +159,7 @@ export default function ReportModal({
       setSuccess(true);
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Submission failed. Please try again.");
+      setError(err instanceof Error ? err.message : t("modal.submissionFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -218,9 +220,9 @@ export default function ReportModal({
                   </div>
                   <div>
                     <h2 className="font-poppins font-bold text-gray-900 text-lg leading-tight">
-                      Report a Problem
+                      {t("modal.title")}
                     </h2>
-                    <p className="text-xs text-gray-500">Help fix your city</p>
+                    <p className="text-xs text-gray-500">{t("modal.subtitle")}</p>
                   </div>
                 </div>
                 <button
@@ -243,18 +245,18 @@ export default function ReportModal({
                     <CheckCircle2 className="w-10 h-10 text-green-600" strokeWidth={1.75} />
                   </motion.div>
                   <h3 className="font-poppins font-black text-2xl text-gray-900">
-                    Report Submitted!
+                    {t("modal.submitted")}
                   </h3>
                   <p className="text-gray-500 text-sm max-w-xs">
-                    Your report is now live on the map for everyone to see.
+                    {t("modal.submittedDesc")}
                   </p>
                   {photoWarning && (
                     <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700 max-w-xs">
-                      ⚠️ Saved without the photo — it couldn&apos;t be uploaded: {photoWarning}
+                      ⚠️ {t("modal.photoWarning", { error: photoWarning })}
                     </div>
                   )}
                   <Button onClick={handleClose} className="mt-2">
-                    Done
+                    {t("modal.done")}
                   </Button>
                 </div>
               ) : (
@@ -262,7 +264,7 @@ export default function ReportModal({
                   {/* Location */}
                   <div>
                     <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest block mb-2">
-                      Location *
+                      {t("modal.location")}
                     </label>
                     {!lat ? (
                       <>
@@ -278,13 +280,13 @@ export default function ReportModal({
                           {gpsStatus === "locating" && (
                             <div className="absolute inset-0 z-[500] bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 pointer-events-none">
                               <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
-                              <p className="text-xs text-white/90 font-medium">Detecting your location…</p>
+                              <p className="text-xs text-white/90 font-medium">{t("modal.detectingLocation")}</p>
                             </div>
                           )}
                         </div>
                         {(gpsStatus === "denied" || gpsStatus === "unavailable") && (
                           <p className="text-[11px] text-gray-400 mt-2">
-                            Location unavailable — tap the map above to drop a pin.
+                            {t("modal.locationUnavailable")}
                           </p>
                         )}
                       </>
@@ -292,15 +294,15 @@ export default function ReportModal({
                       <div className="px-4 py-3 rounded-xl bg-blue-50 border border-blue-200 text-sm text-gray-700 flex items-start gap-2">
                         <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                         <div className="flex-1">
-                          <span className="font-semibold text-blue-600">Pinned: </span>
-                          {geocoding ? "Looking up address…" : address || `${lat.toFixed(5)}, ${lng?.toFixed(5)}`}
+                          <span className="font-semibold text-blue-600">{t("modal.pinned")} </span>
+                          {geocoding ? t("modal.lookingUpAddress") : address || `${lat.toFixed(5)}, ${lng?.toFixed(5)}`}
                         </div>
                         <button
                           type="button"
                           onClick={handleChangeLocation}
                           className="text-xs font-semibold text-blue-600 hover:text-blue-700 shrink-0"
                         >
-                          Change
+                          {t("modal.change")}
                         </button>
                       </div>
                     )}
@@ -309,7 +311,7 @@ export default function ReportModal({
                   {/* Category */}
                   <div>
                     <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest block mb-2">
-                      Category *
+                      {t("modal.category")}
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {(Object.entries(CATEGORY_CONFIG) as [ReportCategory, typeof CATEGORY_CONFIG[ReportCategory]][]).map(
@@ -333,7 +335,7 @@ export default function ReportModal({
                     {category === "other" && (
                       <Input
                         className="mt-2"
-                        placeholder="Specify the problem type…"
+                        placeholder={t("modal.specifyProblemType")}
                         value={otherCategoryText}
                         onChange={(e) => setOtherCategoryText(e.target.value)}
                       />
@@ -343,10 +345,10 @@ export default function ReportModal({
                   {/* Title */}
                   <div>
                     <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest block mb-2">
-                      Title *
+                      {t("modal.title_")}
                     </label>
                     <Input
-                      placeholder="e.g. Large pothole on Main St"
+                      placeholder={t("modal.titlePlaceholder")}
                       value={title}
                       maxLength={100}
                       onChange={(e) => setTitle(e.target.value)}
@@ -356,7 +358,7 @@ export default function ReportModal({
                   {/* Photo */}
                   <div>
                     <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest block mb-2">
-                      Photo
+                      {t("modal.photo")}
                     </label>
 
                     {photoPreview ? (
@@ -378,14 +380,14 @@ export default function ReportModal({
                             onClick={() => cameraInputRef.current?.click()}
                             className="flex-1 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white text-xs font-semibold flex items-center justify-center gap-1.5 backdrop-blur-sm transition-colors"
                           >
-                            <Camera className="w-3.5 h-3.5" /> Retake
+                            <Camera className="w-3.5 h-3.5" /> {t("modal.retake")}
                           </button>
                           <button
                             type="button"
                             onClick={() => galleryInputRef.current?.click()}
                             className="flex-1 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white text-xs font-semibold flex items-center justify-center gap-1.5 backdrop-blur-sm transition-colors"
                           >
-                            <ImagePlus className="w-3.5 h-3.5" /> Change
+                            <ImagePlus className="w-3.5 h-3.5" /> {t("modal.change")}
                           </button>
                         </div>
                       </div>
@@ -406,21 +408,21 @@ export default function ReportModal({
                         }`}
                       >
                         <ImagePlus className="w-7 h-7 text-gray-300" strokeWidth={1.5} />
-                        <p className="text-xs text-gray-400">PNG, JPG, WEBP</p>
+                        <p className="text-xs text-gray-400">{t("modal.photoFormats")}</p>
                         <div className="flex gap-2 w-full">
                           <button
                             type="button"
                             onClick={() => cameraInputRef.current?.click()}
                             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 text-xs font-semibold transition-all"
                           >
-                            <Camera className="w-4 h-4" /> Take Photo
+                            <Camera className="w-4 h-4" /> {t("modal.takePhoto")}
                           </button>
                           <button
                             type="button"
                             onClick={() => galleryInputRef.current?.click()}
                             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 text-xs font-semibold transition-all"
                           >
-                            <ImagePlus className="w-4 h-4" /> Upload Photo
+                            <ImagePlus className="w-4 h-4" /> {t("modal.uploadPhoto")}
                           </button>
                         </div>
                       </div>
@@ -454,11 +456,11 @@ export default function ReportModal({
                   {/* Description — RTL-friendly */}
                   <div>
                     <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest block mb-2">
-                      Description
+                      {t("modal.description")}
                     </label>
                     <Textarea
                       rows={3}
-                      placeholder="Describe the problem… (Arabic, French, or Tunisian)"
+                      placeholder={t("modal.descriptionPlaceholder")}
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       dir="auto"
@@ -468,10 +470,10 @@ export default function ReportModal({
                   {/* Reporter name */}
                   <div>
                     <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest block mb-2">
-                      Your Name (optional)
+                      {t("modal.yourName")}
                     </label>
                     <Input
-                      placeholder="Anonymous"
+                      placeholder={t("modal.anonymous")}
                       value={reporterName}
                       onChange={(e) => setReporterName(e.target.value)}
                     />
@@ -485,7 +487,7 @@ export default function ReportModal({
 
                   <div className="flex gap-3 pt-1">
                     <Button variant="secondary" className="flex-1" onClick={handleClose} disabled={submitting}>
-                      Cancel
+                      {t("modal.cancel")}
                     </Button>
                     <Button
                       className="flex-1"
@@ -495,10 +497,10 @@ export default function ReportModal({
                       {submitting ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          Submitting…
+                          {t("modal.submitting")}
                         </>
                       ) : (
-                        "Submit Report"
+                        t("modal.submitReport")
                       )}
                     </Button>
                   </div>

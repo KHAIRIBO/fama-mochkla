@@ -12,6 +12,7 @@ import FilterCard from "@/components/FilterCard";
 import ReportCard from "@/components/ReportCard";
 import ReportModal from "@/components/ReportModal";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { cleanupResolvedReports, fetchReports, supabase } from "@/lib/supabase";
 import { CATEGORY_CONFIG, STATUS_CONFIG, type Report, type ReportCategory } from "@/types/report";
 
@@ -42,6 +43,7 @@ export default function MapPage() {
 }
 
 function MapPageContent() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const targetLat = parseFloat(searchParams.get("lat") ?? "");
   const targetLng = parseFloat(searchParams.get("lng") ?? "");
@@ -245,7 +247,7 @@ function MapPageContent() {
             <div className="w-full h-full bg-gray-100 flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">
                 <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-                <p className="text-gray-400 text-sm">Loading reports…</p>
+                <p className="text-gray-400 text-sm">{t("map.loadingReports")}</p>
               </div>
             </div>
           )}
@@ -270,7 +272,7 @@ function MapPageContent() {
                   <MousePointerClick className="w-4 h-4 text-blue-600" />
                 </motion.span>
                 <span className="text-sm font-medium text-gray-700 text-center">
-                  Tap anywhere on the map to report a problem
+                  {t("map.tapToReport")}
                 </span>
               </div>
             </motion.div>
@@ -301,7 +303,7 @@ function MapPageContent() {
           transition={{ delay: 0.3 }}
           onClick={() => setMobileFilterOpen((v) => !v)}
           className="md:hidden absolute top-20 left-4 z-[500] w-11 h-11 rounded-full glass shadow-lg flex items-center justify-center text-gray-700"
-          aria-label="Toggle filters"
+          aria-label={t("map.searchFilter")}
         >
           {mobileFilterOpen ? <X className="w-4 h-4" /> : <SlidersHorizontal className="w-4 h-4" />}
           {!mobileFilterOpen && (category !== "all" || status !== "all" || !!search) && (
@@ -338,8 +340,8 @@ function MapPageContent() {
         >
           <Button onClick={handleOpenReportButton} size="default">
             <Plus className="w-4 h-4" strokeWidth={2.5} />
-            <span className="hidden sm:inline">Report a Problem</span>
-            <span className="sm:hidden">Report</span>
+            <span className="hidden sm:inline">{t("nav.reportProblem")}</span>
+            <span className="sm:hidden">{t("nav.report")}</span>
           </Button>
         </motion.div>
 
@@ -355,10 +357,10 @@ function MapPageContent() {
             onClick={handleGps}
             disabled={gpsLoading}
             className="glass shadow-xl"
-            aria-label="Use my location"
+            aria-label={t("map.useMyLocation")}
           >
             <Navigation className={`w-4 h-4 ${gpsLoading ? "animate-pulse" : ""}`} />
-            <span className="hidden sm:inline">{gpsLoading ? "Locating…" : "Use My Location"}</span>
+            <span className="hidden sm:inline">{gpsLoading ? t("map.locating") : t("map.useMyLocation")}</span>
           </Button>
         </motion.div>
 
@@ -371,13 +373,13 @@ function MapPageContent() {
         >
           <span className="flex items-center gap-1.5 text-gray-500">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            Live
+            {t("map.live")}
           </span>
           <span className="text-gray-300">|</span>
           <span className="font-bold text-gray-900">
             <AnimatedNumber value={filtered.length} duration={0.5} />
           </span>
-          <span className="text-gray-500">report{filtered.length !== 1 ? "s" : ""}</span>
+          <span className="text-gray-500">{filtered.length !== 1 ? t("map.reports") : t("map.report")}</span>
         </motion.div>
 
         {/* Scroll hint */}
@@ -387,7 +389,7 @@ function MapPageContent() {
           transition={{ delay: 0.8 }}
           className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center gap-1 text-gray-600 text-[11px] pointer-events-none glass px-3 py-1.5 rounded-full"
         >
-          <span>Scroll for stats</span>
+          <span>{t("map.scrollForStats")}</span>
           <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
             <ChevronDown className="w-4 h-4" />
           </motion.div>
@@ -405,8 +407,8 @@ function MapPageContent() {
         ) : reports.length === 0 ? (
           <div className="text-center py-16 rounded-2xl border border-gray-200 bg-white">
             <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-4" strokeWidth={1.5} />
-            <p className="text-lg font-semibold text-gray-600">No reports yet.</p>
-            <p className="text-sm text-gray-400 mt-1">Be the first to report a problem — tap the map above.</p>
+            <p className="text-lg font-semibold text-gray-600">{t("map.noReportsYet")}</p>
+            <p className="text-sm text-gray-400 mt-1">{t("map.beFirstTapMap")}</p>
           </div>
         ) : (
           <>
@@ -420,7 +422,7 @@ function MapPageContent() {
               <div className="p-5 rounded-2xl border border-blue-200 bg-blue-50">
                 <div className="flex items-center gap-1.5 text-blue-600 mb-2">
                   <FileText className="w-3.5 h-3.5" />
-                  <span className="text-[11px] font-semibold uppercase tracking-widest">Total reports</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-widest">{t("map.totalReports")}</span>
                 </div>
                 <span className="font-poppins font-black text-3xl text-gray-900">
                   <AnimatedNumber value={reports.length} />
@@ -433,7 +435,7 @@ function MapPageContent() {
                   <div key={s} className="p-5 rounded-2xl border border-gray-200 bg-white">
                     <div className="flex items-center gap-1.5 text-gray-500 mb-2">
                       <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                      <span className="text-[11px] font-semibold uppercase tracking-widest">{cfg.label}</span>
+                      <span className="text-[11px] font-semibold uppercase tracking-widest">{t(`status.${s}`)}</span>
                     </div>
                     <span className="font-poppins font-black text-3xl text-gray-900">
                       <AnimatedNumber value={stats.byStatus[s]} />
@@ -453,7 +455,7 @@ function MapPageContent() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-1.5 text-gray-500">
                   <TrendingUp className="w-3.5 h-3.5" />
-                  <span className="text-xs font-semibold">Resolution rate</span>
+                  <span className="text-xs font-semibold">{t("map.resolutionRate")}</span>
                 </div>
                 <span className="font-poppins font-bold text-sm text-gray-900">
                   <AnimatedNumber value={stats.resolutionRate} suffix="%" />
@@ -478,7 +480,7 @@ function MapPageContent() {
               className="p-5 rounded-2xl border border-gray-200 bg-white mb-10"
             >
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
-                Reports by category
+                {t("map.reportsByCategory")}
               </h2>
               <div className="space-y-3">
                 {stats.categoryBreakdown.map(([cat, count]) => {
@@ -511,7 +513,7 @@ function MapPageContent() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-poppins font-bold text-xl text-gray-900 mb-4">Recent Activity</h2>
+              <h2 className="font-poppins font-bold text-xl text-gray-900 mb-4">{t("map.recentActivity")}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recent.map((report, i) => (
                   <div key={report.id} onClick={() => handleCardClick(report)}>

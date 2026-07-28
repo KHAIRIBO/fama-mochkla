@@ -11,10 +11,12 @@ import MapPreview from "@/components/MapPreview";
 import ReportCard from "@/components/ReportCard";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { cleanupResolvedReports, fetchReports, supabase } from "@/lib/supabase";
 import type { Report } from "@/types/report";
 
 export default function HomePage() {
+  const { t } = useLanguage();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,6 +58,12 @@ export default function HomePage() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  const steps = [
+    { step: "01", emoji: "📍", title: t("home.step1Title"), desc: t("home.step1Desc") },
+    { step: "02", emoji: "📸", title: t("home.step2Title"), desc: t("home.step2Desc") },
+    { step: "03", emoji: "🚀", title: t("home.step3Title"), desc: t("home.step3Desc") },
+  ];
+
   return (
     <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
       <Navbar showReport={false} />
@@ -72,7 +80,7 @@ export default function HomePage() {
           className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold tracking-wide"
         >
           <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping" />
-          Community-Powered City Reporting
+          {t("home.badge")}
         </motion.div>
 
         <motion.h1
@@ -82,8 +90,8 @@ export default function HomePage() {
           className="text-center font-poppins font-black max-w-4xl leading-[1.05]"
           style={{ fontSize: "clamp(3rem, 8vw, 7rem)" }}
         >
-          <span className="text-gray-900">Report </span>
-          <span className="text-gradient-brand">It.</span>
+          <span className="text-gray-900">{t("home.heroTitlePrefix")}</span>
+          <span className="text-gradient-brand">{t("home.heroTitleSuffix")}</span>
         </motion.h1>
 
         <motion.p
@@ -92,7 +100,7 @@ export default function HomePage() {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="mt-4 text-center font-poppins font-bold text-gray-700 text-xl md:text-2xl max-w-2xl"
         >
-          Help Fix Your City — One Report at a Time
+          {t("home.heroSubtitle")}
         </motion.p>
 
         <motion.p
@@ -101,8 +109,7 @@ export default function HomePage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-4 text-center text-gray-500 text-base md:text-lg max-w-xl leading-relaxed"
         >
-          Drop a pin, upload a photo, and let the community know about potholes,
-          broken streetlights, garbage, and more — instantly on the live map.
+          {t("home.heroParagraph")}
         </motion.p>
 
         <motion.div
@@ -113,7 +120,7 @@ export default function HomePage() {
         >
           <Link href="/map">
             <Button size="lg">
-              Get Started →
+              {t("home.getStarted")}
             </Button>
           </Link>
         </motion.div>
@@ -139,7 +146,7 @@ export default function HomePage() {
           transition={{ delay: 1.2 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-gray-400 text-xs"
         >
-          <span>Scroll to see reports</span>
+          <span>{t("home.scrollToSee")}</span>
           <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
             <ChevronDown className="w-4 h-4" />
           </motion.div>
@@ -156,19 +163,15 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="font-poppins font-black text-4xl md:text-5xl text-gray-900 mb-4">
-              How it Works
+              {t("home.howItWorksTitle")}
             </h2>
             <p className="text-gray-500 text-base max-w-xl mx-auto">
-              Three simple steps to make your city better.
+              {t("home.howItWorksSubtitle")}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { step: "01", emoji: "📍", title: "Pin the Location", desc: "Click on the map or use your GPS to mark exactly where the problem is." },
-              { step: "02", emoji: "📸", title: "Upload a Photo", desc: "Take or upload a photo. Visual evidence speeds up repairs dramatically." },
-              { step: "03", emoji: "🚀", title: "Submit & Track", desc: "Your report goes live instantly. Watch its status update from Pending to Resolved." },
-            ].map((item, i) => (
+            {steps.map((item, i) => (
               <motion.div
                 key={item.step}
                 initial={{ opacity: 0, y: 24 }}
@@ -203,15 +206,15 @@ export default function HomePage() {
           >
             <div>
               <h2 className="font-poppins font-black text-4xl md:text-5xl text-gray-900 mb-2">
-                Latest Reports
+                {t("home.latestReports")}
               </h2>
               <p className="text-gray-500 text-base">
-                Live feed of community-submitted problems.
+                {t("home.liveFeed")}
               </p>
             </div>
             <Link href="/map">
               <Button variant="outline" size="sm">
-                View all on map →
+                {t("home.viewAllOnMap")}
               </Button>
             </Link>
           </motion.div>
@@ -231,11 +234,11 @@ export default function HomePage() {
           ) : reports.length === 0 ? (
             <div className="text-center py-20">
               <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-4" strokeWidth={1.5} />
-              <p className="text-lg font-semibold text-gray-500">No reports yet.</p>
-              <p className="text-sm text-gray-400 mt-1">Be the first to report a problem!</p>
+              <p className="text-lg font-semibold text-gray-500">{t("home.noReportsYet")}</p>
+              <p className="text-sm text-gray-400 mt-1">{t("home.beFirst")}</p>
               <Link href="/map">
                 <Button className="mt-6">
-                  Go to the Map →
+                  {t("home.goToMap")}
                 </Button>
               </Link>
             </div>
@@ -251,7 +254,7 @@ export default function HomePage() {
             <div className="text-center mt-10">
               <Link href="/map">
                 <Button variant="outline">
-                  See all {reports.length} reports →
+                  {t("home.seeAllReports", { count: reports.length })}
                 </Button>
               </Link>
             </div>
@@ -272,16 +275,16 @@ export default function HomePage() {
             style={{ boxShadow: "0 20px 60px rgba(59,130,246,0.08)" }}
           >
             <h2 className="font-poppins font-black text-4xl md:text-5xl text-gray-900 mb-4">
-              See a problem?
+              {t("home.ctaTitle")}
               <br />
-              <span className="text-blue-600">Report it now.</span>
+              <span className="text-blue-600">{t("home.ctaTitleAccent")}</span>
             </h2>
             <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-              It takes less than a minute. Your report could save someone from a blown tyre or a flooded street.
+              {t("home.ctaParagraph")}
             </p>
             <Link href="/map">
               <Button size="lg">
-                Get Started →
+                {t("home.getStarted")}
               </Button>
             </Link>
           </div>
