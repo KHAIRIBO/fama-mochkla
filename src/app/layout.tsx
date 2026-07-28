@@ -16,12 +16,12 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "FixMyCity — Community Problem Reporting",
+  title: "fama-mochkla — Community Problem Reporting",
   description:
     "Help fix your city one report at a time. Report potholes, broken streetlights, garbage, and more — all on an interactive live map.",
   keywords: ["community", "city", "reporting", "problems", "potholes", "infrastructure"],
   openGraph: {
-    title: "FixMyCity",
+    title: "fama-mochkla",
     description: "Report It. Help Fix Your City — One Report at a Time.",
     type: "website",
   },

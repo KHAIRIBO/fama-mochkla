@@ -37,7 +37,7 @@ export default function Navbar({ onReportClick, showReport = true }: NavbarProps
           <MapPin className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
         </div>
         <span className="font-poppins font-black text-lg tracking-tight text-gray-900">
-          Fix<span className="text-blue-500">My</span>City
+          fama-<span className="text-blue-500">mochkla</span>
         </span>
       </Link>
 

@@ -280,7 +280,7 @@ export default function HomePage() {
         <div className="flex items-center justify-center gap-2 mb-2">
           <MapPin className="w-4 h-4 text-gray-400" />
           <span className="font-poppins font-black text-gray-500">
-            Fix<span className="text-blue-600">My</span>City
+            fama-<span className="text-blue-600">mochkla</span>
           </span>
         </div>
         <p>Built for communities. Powered by OpenStreetMap &amp; Supabase.</p>

@@ -1,4 +1,4 @@
-# FixMyCity 📍
+# fama-mochkla 📍
 
 **A community-powered city problem reporting platform.** Report potholes, broken streetlights, garbage, water leaks, and more — on an interactive live map visible to everyone.
 

@@ -24,7 +24,7 @@ export default function BrowserFrame({ children, className = "" }: BrowserFrameP
         <span className="w-3 h-3 rounded-full bg-green-400" />
         <div className="ml-3 flex-1 h-5 rounded-full bg-gray-100 border border-gray-200 flex items-center px-3">
           <span className="text-[10px] text-gray-400 font-mono tracking-wide select-none">
-            fixmycity.app/map
+            fama-mochkla.app/map
           </span>
         </div>
       </div>
