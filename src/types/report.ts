@@ -22,6 +22,9 @@ export interface Report {
   photo_url: string | null;
   reporter_name: string | null;
   created_at: string;
+  fixed_votes: number;
+  not_fixed_votes: number;
+  resolved_at: string | null;
 }
 
 export const CATEGORY_CONFIG: Record<

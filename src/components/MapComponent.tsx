@@ -25,6 +25,7 @@ import {
   type Report,
 } from "@/types/report";
 import StatusBadge from "./StatusBadge";
+import VoteButtons from "./VoteButtons";
 import "leaflet/dist/leaflet.css";
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
@@ -172,9 +173,23 @@ function ReportPopupContent({ report }: { report: Report }) {
           </p>
         )}
         {report.address && (
-          <p className="text-[11px] text-gray-500 line-clamp-1">📍 {report.address}</p>
+          <p className="text-[11px] text-gray-500 line-clamp-1 flex items-center gap-1" dir="auto">
+            <span className="shrink-0">📍</span>
+            <span className="truncate">{report.address}</span>
+          </p>
         )}
         <p className="text-[10px] text-gray-400">{timeAgo}</p>
+
+        <div className="pt-2 border-t border-gray-100">
+          {report.status === "resolved" ? (
+            <p className="text-[11px] font-medium text-green-600 flex items-center gap-1">
+              ✅ Marked fixed by the community
+            </p>
+          ) : (
+            <VoteButtons report={report} compact />
+          )}
+        </div>
+
         <Link
           href={`/report/${report.id}`}
           className="block w-full text-center py-2 mt-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-colors"

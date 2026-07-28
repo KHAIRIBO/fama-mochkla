@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,11 +6,13 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { fetchReportById } from "@/lib/supabase";
 import StatusBadge from "@/components/StatusBadge";
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { CATEGORY_CONFIG, normalizeCategory } from "@/types/report";
 
-// Mini map (client component)
+// Client components
 import MiniMap from "./MiniMap";
+import VotePanel from "./VotePanel";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -22,6 +25,31 @@ interface MetaItem {
   badge?: React.ReactNode;
 }
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const report = await fetchReportById(id);
+
+  if (!report) {
+    return { title: "Report not found — fama-mochkla" };
+  }
+
+  const catCfg = CATEGORY_CONFIG[normalizeCategory(report.category)];
+  const description =
+    report.description?.slice(0, 160) ||
+    `${catCfg.label} reported${report.address ? ` near ${report.address}` : ""} — fama-mochkla`;
+
+  return {
+    title: `${report.title} — fama-mochkla`,
+    description,
+    openGraph: {
+      title: report.title,
+      description,
+      type: "article",
+      images: report.photo_url ? [report.photo_url] : undefined,
+    },
+  };
+}
+
 export default async function ReportDetailPage({ params }: Props) {
   const { id } = await params;
   const report = await fetchReportById(id);
@@ -31,6 +59,7 @@ export default async function ReportDetailPage({ params }: Props) {
   const catCfg = CATEGORY_CONFIG[normalizeCategory(report.category)];
   const timeAgo = formatDistanceToNow(new Date(report.created_at), { addSuffix: true });
   const fullDate = format(new Date(report.created_at), "PPpp");
+  const mapHref = `/map?lat=${report.latitude}&lng=${report.longitude}`;
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -41,7 +70,7 @@ export default async function ReportDetailPage({ params }: Props) {
         <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-8">
           <Link href="/" className="hover:text-gray-900 transition-colors">Home</Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <Link href="/map" className="hover:text-gray-900 transition-colors">Map</Link>
+          <Link href={mapHref} className="hover:text-gray-900 transition-colors">Map</Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-gray-600 truncate max-w-[200px]">{report.title}</span>
         </nav>
@@ -117,14 +146,28 @@ export default async function ReportDetailPage({ params }: Props) {
               ))}
             </div>
 
+            {/* Voting */}
+            <VotePanel report={report} />
+
             {/* Mini map */}
-            <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white" style={{ height: 220 }}>
-              <MiniMap lat={report.latitude} lng={report.longitude} category={report.category} />
-            </div>
+            <Link
+              href={mapHref}
+              className="group relative block rounded-2xl overflow-hidden border border-gray-200 bg-white"
+              style={{ height: 220 }}
+            >
+              <div className="absolute inset-0 z-[500] pointer-events-none">
+                <MiniMap lat={report.latitude} lng={report.longitude} category={report.category} />
+              </div>
+              <div className="absolute inset-0 z-[600] flex items-end justify-center pb-3 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/40 via-transparent to-transparent">
+                <span className="px-3 py-1.5 rounded-full bg-white text-gray-900 text-xs font-semibold shadow-lg">
+                  Open in full map →
+                </span>
+              </div>
+            </Link>
 
             {/* Actions */}
             <Link
-              href="/map"
+              href={mapHref}
               className="flex items-center justify-center gap-2 w-full py-3 border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-900 text-sm font-semibold rounded-xl transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -133,6 +176,8 @@ export default async function ReportDetailPage({ params }: Props) {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

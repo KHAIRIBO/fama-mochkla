@@ -51,7 +51,7 @@ export async function fetchReportById(id: string): Promise<Report | null> {
 }
 
 export async function insertReport(
-  report: Omit<Report, "id" | "created_at" | "status">
+  report: Omit<Report, "id" | "created_at" | "status" | "fixed_votes" | "not_fixed_votes" | "resolved_at">
 ): Promise<Report> {
   const { data, error } = await supabase
     .from("reports")
@@ -61,6 +61,25 @@ export async function insertReport(
 
   if (error) throw error;
   return normalizeReport(data as Report);
+}
+
+export async function castVote(
+  reportId: string,
+  voteType: "fixed" | "not_fixed"
+): Promise<Report | null> {
+  const { data, error } = await supabase.rpc("cast_report_vote", {
+    p_report_id: reportId,
+    p_vote_type: voteType,
+  });
+
+  if (error) throw error;
+  return data ? normalizeReport(data as Report) : null;
+}
+
+/** Opportunistically removes reports the community marked fixed 24h+ ago — no cron, just runs on page load. */
+export async function cleanupResolvedReports(): Promise<void> {
+  const { error } = await supabase.rpc("cleanup_resolved_reports");
+  if (error) console.error("Cleanup RPC failed:", error);
 }
 
 export async function uploadPhoto(file: File): Promise<string> {

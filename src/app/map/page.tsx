@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { Suspense, useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
-import { ChevronDown, FileText, Inbox, Navigation, Plus, SlidersHorizontal, TrendingUp, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ChevronDown, FileText, Inbox, MousePointerClick, Navigation, Plus, SlidersHorizontal, TrendingUp, X } from "lucide-react";
 import AnimatedNumber from "@/components/AnimatedNumber";
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import FilterCard from "@/components/FilterCard";
 import ReportCard from "@/components/ReportCard";
 import ReportModal from "@/components/ReportModal";
 import { Button } from "@/components/ui/button";
-import { fetchReports, supabase } from "@/lib/supabase";
+import { cleanupResolvedReports, fetchReports, supabase } from "@/lib/supabase";
 import { CATEGORY_CONFIG, STATUS_CONFIG, type Report, type ReportCategory } from "@/types/report";
 
 const MapView = dynamic(() => import("@/components/MapComponent"), {
@@ -26,6 +28,25 @@ const MapView = dynamic(() => import("@/components/MapComponent"), {
 });
 
 export default function MapPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full h-screen bg-gray-100 flex items-center justify-center">
+          <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <MapPageContent />
+    </Suspense>
+  );
+}
+
+function MapPageContent() {
+  const searchParams = useSearchParams();
+  const targetLat = parseFloat(searchParams.get("lat") ?? "");
+  const targetLng = parseFloat(searchParams.get("lng") ?? "");
+  const hasTarget = !Number.isNaN(targetLat) && !Number.isNaN(targetLng);
+
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -36,12 +57,20 @@ export default function MapPage() {
   const [newPinLng, setNewPinLng] = useState<number | null>(null);
   const [modalLat, setModalLat] = useState<number | null>(null);
   const [modalLng, setModalLng] = useState<number | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number] | undefined>();
-  const [mapZoom, setMapZoom] = useState(7);
+  const [mapCenter, setMapCenter] = useState<[number, number] | undefined>(
+    hasTarget ? [targetLat, targetLng] : undefined
+  );
+  const [mapZoom, setMapZoom] = useState(hasTarget ? 16 : 7);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [userLat, setUserLat] = useState<number | null>(null);
   const [userLng, setUserLng] = useState<number | null>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [showClickHint, setShowClickHint] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowClickHint(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const loadReports = useCallback(async () => {
     try {
@@ -93,13 +122,25 @@ export default function MapPage() {
   const recent = reports.slice(0, 6);
 
   useEffect(() => {
+    // Lazy cleanup — no cron job exists, so this is what actually deletes reports
+    // that were voted "fixed" 24h+ ago. Runs whenever anyone loads the map.
+    cleanupResolvedReports();
+
     const channel = supabase
       .channel("reports-map")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "reports" },
+        { event: "*", schema: "public", table: "reports" },
         (payload) => {
-          setReports((prev) => [payload.new as Report, ...prev]);
+          if (payload.eventType === "INSERT") {
+            setReports((prev) => [payload.new as Report, ...prev]);
+          } else if (payload.eventType === "UPDATE") {
+            const updated = payload.new as Report;
+            setReports((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+          } else if (payload.eventType === "DELETE") {
+            const deletedId = (payload.old as { id: string }).id;
+            setReports((prev) => prev.filter((r) => r.id !== deletedId));
+          }
         }
       )
       .subscribe();
@@ -108,7 +149,8 @@ export default function MapPage() {
   }, []);
 
   // Auto-detect the visitor's location on load so the map can show a
-  // "You are here" marker and start centered nearby.
+  // "You are here" marker and start centered nearby — unless we were sent
+  // here to focus a specific report (?lat=&lng=), which takes priority.
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -116,12 +158,15 @@ export default function MapPage() {
         const { latitude, longitude } = pos.coords;
         setUserLat(latitude);
         setUserLng(longitude);
-        setMapCenter([latitude, longitude]);
-        setMapZoom(13);
+        if (!hasTarget) {
+          setMapCenter([latitude, longitude]);
+          setMapZoom(13);
+        }
       },
       () => {},
       { enableHighAccuracy: true, timeout: 10000 }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- hasTarget derives from URL params present at mount, deliberately not re-run on change
   }, []);
 
   const openReportAt = useCallback((lat: number, lng: number) => {
@@ -130,6 +175,7 @@ export default function MapPage() {
     setModalLat(lat);
     setModalLng(lng);
     setModalOpen(true);
+    setShowClickHint(false);
   }, []);
 
   const handleMapClick = useCallback(
@@ -177,7 +223,7 @@ export default function MapPage() {
 
   return (
     <div className="bg-white text-gray-900">
-      <Navbar onReportClick={handleOpenReportButton} />
+      <Navbar showReport={false} />
 
       {/* Big live map */}
       <section className="relative w-full h-screen overflow-hidden">
@@ -204,6 +250,32 @@ export default function MapPage() {
             </div>
           )}
         </div>
+
+        {/* Click-to-report hint — sits in the empty middle of the map, out of the way of the corner UI */}
+        <AnimatePresence>
+          {!loading && showClickHint && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[500] pointer-events-none px-4"
+            >
+              <div className="glass rounded-2xl px-5 py-3 flex items-center gap-2.5 shadow-xl">
+                <motion.span
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                  className="shrink-0"
+                >
+                  <MousePointerClick className="w-4 h-4 text-blue-600" />
+                </motion.span>
+                <span className="text-sm font-medium text-gray-700 text-center">
+                  Tap anywhere on the map to report a problem
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Filter card — always visible on desktop */}
         <motion.div
@@ -451,6 +523,8 @@ export default function MapPage() {
           </>
         )}
       </main>
+
+      <Footer />
 
       <ReportModal
         isOpen={modalOpen}

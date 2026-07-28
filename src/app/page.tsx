@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ChevronDown, Inbox, MapPin } from "lucide-react";
+import { ChevronDown, Inbox } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import FloatingEmojiBackground from "@/components/FloatingEmojiBackground";
 import BrowserFrame from "@/components/BrowserFrame";
 import MapPreview from "@/components/MapPreview";
 import ReportCard from "@/components/ReportCard";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { fetchReports, supabase } from "@/lib/supabase";
+import { cleanupResolvedReports, fetchReports, supabase } from "@/lib/supabase";
 import type { Report } from "@/types/report";
 
 export default function HomePage() {
@@ -31,14 +32,23 @@ export default function HomePage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional initial data load
     loadReports();
+    cleanupResolvedReports();
 
     const channel = supabase
       .channel("reports-home")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "reports" },
+        { event: "*", schema: "public", table: "reports" },
         (payload) => {
-          setReports((prev) => [payload.new as Report, ...prev]);
+          if (payload.eventType === "INSERT") {
+            setReports((prev) => [payload.new as Report, ...prev]);
+          } else if (payload.eventType === "UPDATE") {
+            const updated = payload.new as Report;
+            setReports((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+          } else if (payload.eventType === "DELETE") {
+            const deletedId = (payload.old as { id: string }).id;
+            setReports((prev) => prev.filter((r) => r.id !== deletedId));
+          }
         }
       )
       .subscribe();
@@ -278,15 +288,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      <footer className="border-t border-gray-200 py-8 px-6 text-center text-gray-400 text-sm bg-white">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <MapPin className="w-4 h-4 text-gray-400" />
-          <span className="font-poppins font-black text-gray-500">
-            fama-<span className="text-blue-600">mochkla</span>
-          </span>
-        </div>
-        <p>Built for communities. Powered by OpenStreetMap &amp; Supabase.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

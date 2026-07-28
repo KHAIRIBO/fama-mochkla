@@ -35,6 +35,9 @@ export default function MapPreview() {
     photo_url: null,
     reporter_name: null,
     created_at: new Date().toISOString(),
+    fixed_votes: 0,
+    not_fixed_votes: 0,
+    resolved_at: null,
   }));
 
   return (
