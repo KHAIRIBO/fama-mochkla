@@ -54,6 +54,7 @@ export default function ReportModal({
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [photoWarning, setPhotoWarning] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [gpsStatus, setGpsStatus] = useState<"idle" | "locating" | "denied" | "unavailable">("idle");
@@ -121,11 +122,22 @@ export default function ReportModal({
 
     setSubmitting(true);
     setError(null);
+    setPhotoWarning(null);
+
+    // Photo upload failures (e.g. the storage bucket isn't set up yet) shouldn't
+    // block the report itself from being saved — fall back to no photo instead.
+    let photo_url: string | null = null;
+    if (photoFile) {
+      try {
+        photo_url = await uploadPhoto(photoFile);
+      } catch (err) {
+        setPhotoWarning(
+          err instanceof Error ? err.message : "The photo couldn't be uploaded."
+        );
+      }
+    }
 
     try {
-      let photo_url: string | null = null;
-      if (photoFile) photo_url = await uploadPhoto(photoFile);
-
       const finalDescription =
         category === "other" && otherCategoryText.trim()
           ? `[${otherCategoryText.trim()}] ${description}`.trim()
@@ -163,6 +175,7 @@ export default function ReportModal({
     setOtherCategoryText("");
     setReporterName("");
     setError(null);
+    setPhotoWarning(null);
     setSuccess(false);
     setGpsStatus("idle");
     onClose();
@@ -235,6 +248,11 @@ export default function ReportModal({
                   <p className="text-gray-500 text-sm max-w-xs">
                     Your report is now live on the map for everyone to see.
                   </p>
+                  {photoWarning && (
+                    <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700 max-w-xs">
+                      ⚠️ Saved without the photo — it couldn&apos;t be uploaded: {photoWarning}
+                    </div>
+                  )}
                   <Button onClick={handleClose} className="mt-2">
                     Done
                   </Button>

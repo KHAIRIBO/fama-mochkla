@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ChevronDown, Inbox, MapPin } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import FloatingEmojiBackground from "@/components/FloatingEmojiBackground";
 import BrowserFrame from "@/components/BrowserFrame";
 import MapPreview from "@/components/MapPreview";
 import ReportCard from "@/components/ReportCard";
@@ -52,6 +53,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-20 overflow-hidden bg-grain">
         <div className="mesh-glow" />
+        <FloatingEmojiBackground />
 
         <motion.div
           initial={{ opacity: 0, y: -12 }}
