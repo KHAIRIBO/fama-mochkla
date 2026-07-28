@@ -1,65 +1,290 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { ChevronDown, Inbox, MapPin } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import BrowserFrame from "@/components/BrowserFrame";
+import MapPreview from "@/components/MapPreview";
+import ReportCard from "@/components/ReportCard";
+import { Button } from "@/components/ui/button";
+import { fetchReports, supabase } from "@/lib/supabase";
+import type { Report } from "@/types/report";
+
+export default function HomePage() {
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadReports = async () => {
+    try {
+      const data = await fetchReports();
+      setReports(data);
+    } catch (e) {
+      console.error("Failed to load reports:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional initial data load
+    loadReports();
+
+    const channel = supabase
+      .channel("reports-home")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "reports" },
+        (payload) => {
+          setReports((prev) => [payload.new as Report, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
+      <Navbar showReport={false} />
+
+      {/* Hero */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-20 overflow-hidden bg-grain">
+        <div className="mesh-glow" />
+
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold tracking-wide"
+        >
+          <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping" />
+          Community-Powered City Reporting
+        </motion.div>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-center font-poppins font-black max-w-4xl leading-[1.05]"
+          style={{ fontSize: "clamp(3rem, 8vw, 7rem)" }}
+        >
+          <span className="text-gray-900">Report </span>
+          <span className="text-gradient-brand">It.</span>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mt-4 text-center font-poppins font-bold text-gray-700 text-xl md:text-2xl max-w-2xl"
+        >
+          Help Fix Your City — One Report at a Time
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-4 text-center text-gray-500 text-base md:text-lg max-w-xl leading-relaxed"
+        >
+          Drop a pin, upload a photo, and let the community know about potholes,
+          broken streetlights, garbage, and more — instantly on the live map.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="mt-10 flex flex-wrap items-center justify-center gap-4"
+        >
+          <Link href="/map">
+            <Button size="lg">
+              Get Started →
+            </Button>
+          </Link>
+        </motion.div>
+
+        {/* Live map preview in browser frame */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8 }}
+          className="mt-20 w-full max-w-5xl"
+        >
+          <Link href="/map" className="block group">
+            <BrowserFrame className="transition-transform duration-300 group-hover:scale-[1.01]">
+              <MapPreview />
+            </BrowserFrame>
+          </Link>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-gray-400 text-xs"
+        >
+          <span>Scroll to see reports</span>
+          <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+            <ChevronDown className="w-4 h-4" />
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-24 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <h2 className="font-poppins font-black text-4xl md:text-5xl text-gray-900 mb-4">
+              How it Works
+            </h2>
+            <p className="text-gray-500 text-base max-w-xl mx-auto">
+              Three simple steps to make your city better.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { step: "01", emoji: "📍", title: "Pin the Location", desc: "Click on the map or use your GPS to mark exactly where the problem is." },
+              { step: "02", emoji: "📸", title: "Upload a Photo", desc: "Take or upload a photo. Visual evidence speeds up repairs dramatically." },
+              { step: "03", emoji: "🚀", title: "Submit & Track", desc: "Your report goes live instantly. Watch its status update from Pending to Resolved." },
+            ].map((item, i) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="relative p-6 rounded-2xl border border-gray-200 bg-white overflow-hidden hover:border-blue-300 transition-all card-hover"
+                style={{ boxShadow: "0 2px 12px rgba(15,23,42,0.05)" }}
+              >
+                <span className="absolute top-4 right-5 font-poppins font-black text-5xl text-gray-50">
+                  {item.step}
+                </span>
+                <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-3xl mb-4">
+                  {item.emoji}
+                </div>
+                <h3 className="font-poppins font-bold text-gray-900 text-lg mb-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* Reports feed — light background */}
+      <section id="reports" className="py-24 px-6 bg-[#f8f9fa]">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-end justify-between mb-12 flex-wrap gap-4"
+          >
+            <div>
+              <h2 className="font-poppins font-black text-4xl md:text-5xl text-gray-900 mb-2">
+                Latest Reports
+              </h2>
+              <p className="text-gray-500 text-base">
+                Live feed of community-submitted problems.
+              </p>
+            </div>
+            <Link href="/map">
+              <Button variant="outline" size="sm">
+                View all on map →
+              </Button>
+            </Link>
+          </motion.div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden border border-gray-200 bg-white">
+                  <div className="skeleton h-48 w-full bg-gray-100" />
+                  <div className="p-4 space-y-2">
+                    <div className="skeleton h-4 w-3/4 bg-gray-100" />
+                    <div className="skeleton h-3 w-1/2 bg-gray-100" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : reports.length === 0 ? (
+            <div className="text-center py-20">
+              <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-4" strokeWidth={1.5} />
+              <p className="text-lg font-semibold text-gray-500">No reports yet.</p>
+              <p className="text-sm text-gray-400 mt-1">Be the first to report a problem!</p>
+              <Link href="/map">
+                <Button className="mt-6">
+                  Go to the Map →
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reports.slice(0, 9).map((report, i) => (
+                <ReportCard key={report.id} report={report} index={i} />
+              ))}
+            </div>
+          )}
+
+          {reports.length > 9 && (
+            <div className="text-center mt-10">
+              <Link href="/map">
+                <Button variant="outline">
+                  See all {reports.length} reports →
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 px-6 bg-white">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-3xl mx-auto text-center"
+        >
+          <div
+            className="relative p-12 rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-orange-50 overflow-hidden"
+            style={{ boxShadow: "0 20px 60px rgba(59,130,246,0.08)" }}
+          >
+            <h2 className="font-poppins font-black text-4xl md:text-5xl text-gray-900 mb-4">
+              See a problem?
+              <br />
+              <span className="text-blue-600">Report it now.</span>
+            </h2>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto">
+              It takes less than a minute. Your report could save someone from a blown tyre or a flooded street.
+            </p>
+            <Link href="/map">
+              <Button size="lg">
+                Get Started →
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      <footer className="border-t border-gray-200 py-8 px-6 text-center text-gray-400 text-sm bg-white">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <MapPin className="w-4 h-4 text-gray-400" />
+          <span className="font-poppins font-black text-gray-500">
+            Fix<span className="text-blue-600">My</span>City
+          </span>
+        </div>
+        <p>Built for communities. Powered by OpenStreetMap &amp; Supabase.</p>
+      </footer>
     </div>
   );
 }
