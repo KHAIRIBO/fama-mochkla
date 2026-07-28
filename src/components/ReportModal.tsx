@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Camera, CheckCircle2, ImagePlus, Loader2, MapPin, X } from "lucide-react";
+import { AlertTriangle, Camera, CheckCircle2, ImagePlus, Loader2, MapPin, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { insertReport, uploadPhoto } from "@/lib/supabase";
 import { CATEGORY_CONFIG, type ReportCategory } from "@/types/report";
@@ -251,8 +251,11 @@ export default function ReportModal({
                     {t("modal.submittedDesc")}
                   </p>
                   {photoWarning && (
-                    <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700 max-w-xs">
-                      ⚠️ {t("modal.photoWarning", { error: photoWarning })}
+                    <div className="w-full max-w-xs px-4 py-3 rounded-xl bg-amber-50 border-2 border-amber-300 text-left flex items-start gap-2.5">
+                      <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                      <p className="text-sm font-medium text-amber-800 leading-snug">
+                        {t("modal.photoWarning", { error: photoWarning })}
+                      </p>
                     </div>
                   )}
                   <Button onClick={handleClose} className="mt-2">
